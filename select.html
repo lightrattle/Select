@@ -57,7 +57,7 @@
         <div style="position: absolute;width:200px;height: 80px; border: 0;right:25%;bottom:25%;">
             <label style="height: 18%;top:0%;left: 0%;" for="联想多选">联想多选:</label>
             <cs-select id="联想多选" style="display: block;position: relative;;height: 60%;width: 100%;border:1px solid #000" 
-             cho="checkbox isAsso="true">
+             cho="checkbox" isAsso="true">
                 <option value="1">a—1</option>
                 <option value="2">a—2</option>
                 <option value="3">a—3</option>
@@ -335,9 +335,14 @@
 
                     this.$sele = content.querySelector(".cs-select");//获得显示框
                     //调整显示框的样式
-                    this.$sele.setAttribute("style", "overflow: hidden");
-                    this.$sele.setAttribute("style", "flex-wrap: wrap");
-                    this.$sele.setAttribute("style", "overflow-y: scroll");
+                    $(this.$sele).css({
+                        'overflow': 'hidden',
+                        'flex-wrap': 'wrap',
+                        'overflow-y': 'scroll'
+                    });
+                    // this.$sele.setAttribute("style", "overflow: hidden");
+                    // this.$sele.setAttribute("style", "flex-wrap: wrap");
+                    // this.$sele.setAttribute("style", "overflow-y: scroll");
                     this.$box = content.querySelector(".cs-select-box");//获得下拉菜单
                     //调整下拉菜单的样式，包括背景色、滚动方式
                     $(this.$box).css({
