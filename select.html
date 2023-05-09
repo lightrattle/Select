@@ -87,27 +87,57 @@
                         text-align: center;
                         vertical-align: middle;
                     }
+                    //为cs-select中的id=input设置样式
+                    .cs-select #input:empty{
+                        width: 2px;
+                    }
+                    .cs-select #input:not(:empty){
+                        width: unset !important;
+                    }
+                    /* 右侧三角形*/
+                    .cs-select:after {
+                        color: #000;
+                        font-weight: bolder;
+                        content: "∨";
+                        position: absolute;
+                        right: 4px;
+                        display:flex;
+                        flex-direction:row;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .cs-select[show-select="false"]:after {
+                        color: #000;
+                        font-weight: bolder;
+                        content: "∨";
+                        position: absolute;
+                        right: 4px;
+                        display:flex;
+                        flex-direction:row;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .cs-select[show-select="true"]:after {
+                        color: #000;
+                        font-weight: bolder;
+                        content: "∧";
+                        position: absolute;
+                        right: 4px;
+                        display:flex;
+                        flex-direction:row;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .cs-select:not(:empty)::after {
+                        display: none;
+                    }
                     .cs-select::-webkit-scrollbar {
                         display: none;
                     }    
                     .cs-select input{
                         outline: none;
                     }
-                    /* 右侧三角形*/
-                    // .cs-select::after {
-                    //     color: #000;
-                    //     content: "";
-                    //     position: absolute;
-                    //     top: 50%;
-                    //     right: 0;
-                    //     transform: translateY(-50%);
-                    //     border-left: 6px solid transparent;
-                    //     border-right: 6px solid transparent;
-                    //     border-top: 6px solid #000;
-                    // }
-                    // .cs-select:not(:empty)::after {
-                    //     display: none;
-                    // }
+                    
                     /* 如果显示结果的框中无数据，则可以显示预置文本*/
                     .cs-select:empty::before {
                         content: attr(placeholder);
@@ -237,7 +267,6 @@
                     //加入事件监听
                     this.$sele.addEventListener('click', (e)=>{//这个是显示框的点击事件，当点击时，显示/隐藏下拉菜单
                         e.preventDefault();//取消默认事件
-
                         /** 下面155-162行是用于判断下拉框是否需要显示在显示框上部的，一免点击的位置过低时看不见下拉框
                          *  注：这段代码在四个下拉的这个位置都有，在下面就不重复解释
                          */
@@ -249,7 +278,6 @@
                         //     // 将下拉菜单的top修改为：=原来值-下拉框高度 + 其父td的位置offsettop 
                         //     $(this.$box)[0].style.top = $(this.$box)[0].offsetTop - 182 + $(this).parent()[0].offsetTop;                    
                         // }
-
                         let pthis = $(e.target);
                         // 这里时点击显示框时获取数据
                         this.oldOptions = [];//置空存放下拉数据的数组
@@ -338,7 +366,8 @@
                     $(this.$sele).css({
                         'overflow': 'hidden',
                         'flex-wrap': 'wrap',
-                        'overflow-y': 'scroll'
+                        'overflow-y': 'scroll',
+                        'cursor':'text'
                     });
                     // this.$sele.setAttribute("style", "overflow: hidden");
                     // this.$sele.setAttribute("style", "flex-wrap: wrap");
@@ -355,7 +384,7 @@
                     this.$sele.setAttribute("name", this.name);
 
                     //为cs-select添加内部的文本框并设置样式
-                    var input = $("<div id='input' style='outline: none;;border: 0;text-align:left;vertical-align:middle' contenteditable='true'></div>");
+                    var input = $("<div tabindex='0' id='input' style='outline: none;;border: 0;text-align:left;vertical-align:middle;width:2px' contenteditable='true'></div>");
                     $(this.$sele).append(input);
 
                     shadow.appendChild(content);
@@ -392,20 +421,16 @@
                         // if (tdOffsetTop  > (windowHeight/2 + 60)) {// 如果需要移动
                         //     // 将下拉菜单的top修改为：=原来值-下拉框高度 + 其父td的位置offsettop 
                         //     $(this.$box)[0].style.top = Number($(this.$box)[0].offsetTop - 183 + $(this).parent()[0].offsetTop) + 'px';
-
                         // }
 
                         let pthis = $(e.target);//这个变量是下拉组件的显示框元素
                         this.oldOptions = [];
-                        
-                        //将光标移动到input中
-                        $(this.$sele).find("#input").focus();
 
                         this.chooseGetMethod((obj)=>{//获取数据，联想输入的单选和多选由于数据一般较多，不在初始化时获取，而是在此处获取
                             let tagstr = $(this.$sele).find("#input").html();
                             //调用插入数据函数
                             this.setBoxforAsso("checkbox", obj.oldOptions, obj.newOptions, tagstr, obj.$box);//这里根据上面的tagstr设置下拉框中的内容
-                            if($(this).find("cs-select").length < 1 && $(this).attr('show-select') == 'true'){
+                            if($(this).find("cs-select").length < 1 && $(this.$sele).attr('show-select') == 'true'){
                                 $(this.$sele).attr('show-select', 'false');
                                 $(this.$sele).next().hide();
                                 return;
@@ -413,6 +438,9 @@
                                 $(this.$sele).attr('show-select', 'false');
                                 $(this.$sele).attr('show-select', 'true');
                                 $(this.$sele).next().show();
+                                //将光标移动到input中
+                                $(this.$sele).find("#input").blur();
+                                $(this.$sele).find("#input").focus();
                             }
                             //失焦逻辑
                             top.window.$(document).click(pthis,(event)=>{
@@ -436,14 +464,23 @@
                     this.$sele.setAttribute("cho", this.cho);
                     this.$sele.setAttribute("name", this.name);
                     this.$sele.setAttribute("canInsert", this.getAttribute("canInsert") !== null?this.getAttribute("canInsert"):"false");
-                    var input = document.createElement("input");
-                    input.setAttribute("type", "text");
-                    input.setAttribute("style", "border: 0;height: 100%;width: 100%;text-align: center;");
-                    this.$sele.appendChild(input);
+
+                    // var input = document.createElement("input");
+                    // input.setAttribute("type", "text");
+                    // input.setAttribute("style", "border: 0;height: 100%;width: 100%;text-align: center;");
+                    // this.$sele.appendChild(input);
                     //为cs-select内的input检查有无添加placeholder文本（有则预显示，无则不显示预加载文本）
-                    if(this.getAttribute("placeholder") !== ""){
-                        $(this.$sele).find("input").attr("placeholder", this.getAttribute("placeholder"));
-                    }
+                    // if(this.getAttribute("placeholder") !== ""){
+                    //     $(this.$sele).find("input").attr("placeholder", this.getAttribute("placeholder"));
+                    // }
+
+                    //为cs-select添加内部的文本框并设置样式
+                    var input = $("<div tabindex='0' id='input' style='outline: none;;border: 0;text-align:left;vertical-align:middle;width:2px' contenteditable='true'></div>");
+                    $(this.$sele).append(input);
+                    $(this.$sele).css({
+                        'cursor': 'text'
+                    });
+
                     this.$box = content.querySelector(".cs-select-box");//获得下拉菜单
                     shadow.appendChild(content);
                     //调整下拉菜单最大高度
@@ -454,13 +491,13 @@
                         'z-index': '91'
                     });
                     //输入文本时调用展示下拉菜单函数
-                    $(this.$sele).find("input").on('input propertychange', ()=>{
-                        var pthis = $(this.$sele).find("input");
-                        if (pthis.val() != "") {
-                            this.setBoxforAsso("radio", this.oldOptions, this.newOptions, pthis.val(), this.$box);
+                    $(this.$sele).find("#input").on('input propertychange', ()=>{
+                        var pthis = $(this.$sele).find("#input");
+                        if (pthis.html() != "") {
+                            this.setBoxforAsso("radio", this.oldOptions, this.newOptions, pthis.html(), this.$box);
                         }
                         else{
-                            this.setBoxforAsso("radio", this.oldOptions, this.newOptions, pthis.val(), this.$box);
+                            this.setBoxforAsso("radio", this.oldOptions, this.newOptions, "", this.$box);
                         }
                     });
 
@@ -474,38 +511,43 @@
                         // // 判断是否在上半区域
                         // if (tdOffsetTop  > (windowHeight/2 + 60)) {// 如果需要移动
                         //     // 将下拉菜单的top修改为：=原来值-下拉框高度 + 其父td的位置offsettop 
-                        //     $(this.$box)[0].style.top = $(this.$box)[0].offsetTop - 182 + $(this).parent()[0].offsetTop;                    
+                        //     $(this.$box)[0].style.top = Number($(this.$box)[0].offsetTop - 182 + $(this).parent()[0].offsetTop) + 'px';                    
                         // }
 
                         let pthis = $(e.target);
                         this.oldOptions = [];
+                        
                         this.chooseGetMethod((obj)=>{
+                            let tagstr = $(this.$sele).find("#input")?"":$(this.$sele).find("#input").html();
                             //调用插入数据函数
-                            this.setBoxforAsso("radio", obj.oldOptions, obj.newOptions, pthis.val(), obj.$box);
-                            if(pthis.parent().find("cs-select").length < 1 && pthis.parent().attr('show-select') == 'true'){
-                                pthis.parent().attr('show-select', 'false');
-                                pthis.parent().next().hide();
+                            this.setBoxforAsso("radio", obj.oldOptions, obj.newOptions, tagstr, obj.$box);
+                            if($(this).find("cs-select").length < 1 && $(this.$sele).attr('show-select') == 'true'){
+                                $(this.$sele).attr('show-select', 'false');
+                                $(this.$sele).next().hide();
                                 return;
-                            } 
-                            else if(pthis.parent().find("cs-select").length < 1){
-                                pthis.parent().attr('show-select', 'false');
-                                pthis.parent().attr('show-select', 'true');
-                                pthis.parent().next().show();
+                            } else if($(this).find("cs-select").length < 1){
+                                $(this.$sele).attr('show-select', 'false');
+                                $(this.$sele).attr('show-select', 'true');
+                                $(this.$sele).next().show();
+                                //将光标移动到input中
+                                $(this.$sele).find("#input").blur();
+                                $(this.$sele).find("#input").focus();
                             }
                             var flag = true;
                             //失焦逻辑
-                            //TODO 下面的执行两次导致会隐藏右侧td（临时解决
-                            top.window.$(document).click([pthis, flag],function(event){
-                                if((pthis.parent().find("cs-select").length == 0) && ((event.target.shadowRoot === null) || $(event.target.shadowRoot).children().find(".cs-select")[0]  !== pthis.parent()[0])){
-                                    pthis.parent()[0].setAttribute('show-select', 'false');
-                                    pthis.parent().next().hide();
+                            top.window.$(document).click([pthis, flag],(event)=>{
+                                if(($(this).find("cs-select").length == 0) && (event.target !== $(this)[0]) && ((event.target.shadowRoot === null) 
+                                || $(event.target.shadowRoot).children().find(".cs-select")[0] !== pthis[0])){
+                                    $(this.$sele).attr('show-select', 'false');
+                                    $(this.$sele).next().hide();
+                                    $(this.$sele).find("#input").html("");
                                     //判定若输入的数据不在已知库数据中(列表首项和输入文本不符合)，发送事件用于外部确认是否添加新数据
-                                    if((pthis.parent()[0].getAttribute("canInsert") === "true"&& pthis.parent().find("Input").val() !== "" && 
-                                    ((pthis.parent().next().find("li").length === 0) ||
-                                    (pthis.parent().find("Input").val() !== pthis.parent().next().find("li")?.[0].innerHTML))) && 
+                                    if(($(this.$sele)[0].getAttribute("canInsert") === "true"&& $(this.$sele).find("#input").html() !== "" && 
+                                    (($(this.$sele).next().find("li").length === 0) ||
+                                    ($(this.$sele).find("#input").html() !== $(this.$sele).next().find("li")?.[0].innerHTML))) && 
                                     (flag)){
                                         var changeEvent = new Event("without", {"bubbles":true, "composed":true});
-                                        pthis.parent()[0].dispatchEvent(changeEvent);
+                                        $(this.$sele)[0].dispatchEvent(changeEvent);
                                         flag=false;
                                     }
                                 }
@@ -605,15 +647,15 @@
                                 var idtag = mapping['id'];
                                 if((Number(idtag)-0).toString() !== 'NaN'){// 这里是一个重要的判定
                                     /** 上面的idtag是在组件的mapping属性中指定的id映射，
-                                     * 如果idtag是一个数字，代表从几开始编号下拉框中的选项，如0就是从0开始编号
+                                    * 如果idtag是一个数字，代表从几开始编号下拉框中的选项，如0就是从0开始编号
                                     */
                                     var shouldAdd = (Number(idtag)-0);
                                     if(nametag !== 'valueOfI'){
                                         // 这个是=为了适应不同的json结构
                                         /** 如果data是存在id和name的{}，那就直接获取即可，
-                                         * 但如果data只有name属性，并不存在映射（即它是一个数组，就将nametag值设置为valueOfI，代表通过i去获取数据
-                                         * 即name的值就是数组中第i个数据对应下方522行的if
-                                         */
+                                        * 但如果data只有name属性，并不存在映射（即它是一个数组，就将nametag值设置为valueOfI，代表通过i去获取数据
+                                        * 即name的值就是数组中第i个数据对应下方522行的if
+                                        */
                                         for (let i = 0; i < data.length; i++) {
                                             this.oldOptions.push({
                                                 'name' : data[i][nametag],
@@ -787,9 +829,9 @@
             }
 
             /** 这下面的setBoxforCheckbox、setBoxforRadio、setBoxforAsso是在获取到数据存于数组后设置下拉框中选项的方法
-             * setBoxforCheckbox    为普通多选框设置下拉框
-             * setBoxforRadio       为普通单选框设置下拉框
-             * setBoxforAsso        为联想输入设置下拉框（只是一个判断，具体的实现是这个函数下面的两个show函数（因为涉及产生一个newOptoions数组
+            * setBoxforCheckbox    为普通多选框设置下拉框
+            * setBoxforRadio       为普通单选框设置下拉框
+            * setBoxforAsso        为联想输入设置下拉框（只是一个判断，具体的实现是这个函数下面的两个show函数（因为涉及产生一个newOptoions数组
             */
             setBoxforCheckbox(content, oldOptions){//将获取好的内容设置到下拉菜单div中
                 if(content.querySelector(".cs-select-box")!==null && $(content.querySelector(".cs-select-box")).find("div").length == 0){
@@ -848,8 +890,6 @@
                     //为每个div绑定事件
                     var divList = $(content.querySelector("div.cs-select-box")).find("div");
                     var pthis = this;
-                    pthis.setAttribute("idNum", "");
-                    $(pthis).parent().attr("idNum", "");
                     for(var i = 0; i < divList.length-1; i++){
                         divList.eq(i).click(function(){
                             $(this).find("input").attr("checked",true);
@@ -859,7 +899,7 @@
                             $(this).parent().prev().attr('show-select', 'false');
                             $(this).parent().hide();
                             pthis.setAttribute("idNum", $(this).find("input").val());
-                            $(pthis).parent().attr("idNum", $(this).find("input").val());
+                            pthis.shadowRoot.querySelector(".cs-select").setAttribute("idNum", $(this).find("input").val());
                         });
                     }
                     divList.eq(divList.length-1).click(function(){// 这一段是最底下的一个选项，用于单选框清空已选内容
@@ -871,7 +911,7 @@
                         $(this).parent().prev().attr('show-select', 'false');
                         $(this).parent().hide();
                         pthis.setAttribute("idNum", "");// 同步清空对应的已选id
-                        $(pthis).parent().attr("idNum", "");// 同步清空对应的已选id
+                        pthis.shadowRoot.querySelector(".cs-select").setAttribute("idNum", "");// 同步清空对应的已选id
                     });
                 }
             }
@@ -891,6 +931,42 @@
                 newOptions = [];// 这个变量是存放联想结果的数组
                 let ulObj = $('<ul style="list-style: none;overflow-y:auto;padding:0;"></ul>');
                 let tagStr = tag;
+                // 优化循环处理，但需要唯一标识才可用
+                // if (tagStr.length === 0) {
+                //     let optionConf = sessionStorage.getItem('optionConf')
+                //     if (optionConf) {
+                //         optionConf = JSON.parse(optionConf)
+                //     }
+                //     console.log(optionConf)
+                //     if (optionConf && optionConf.type === top.working.sheetType) {
+                //         newOptions = optionConf.options
+                //     } else {
+                //         for (let i = 0; i < oldOptions.length; i++) {
+                //             newOptions.push({
+                //                 name: oldOptions[i],
+                //                 num: 0
+                //             })
+                //         }
+                //         optionConf = JSON.stringify({type: top.working.sheetType, options: newOptions})
+                //         optionConf = sessionStorage.setItem('optionConf', optionConf)
+                //     }
+                // } else {
+                //     for (let i = 0; i < oldOptions.length; i++) {
+                //         let num = 0;
+                //         for (let k = 0; k < tagStr.length; k++) {
+                //             if (oldOptions[i].name.toLowerCase().indexOf(tagStr[k].toLowerCase()) >= 0) {
+                //                 num++;
+                //             }
+                //         }
+                //         if(num > 0) {
+                //             let item = {
+                //                 name: oldOptions[i],
+                //                 num: num
+                //             };
+                //             newOptions.push(item);   
+                //         }   
+                //     }
+                // }
 
                 //列表显示逻辑（匹配度越高的越靠前显示）
                 for (let i = 0; i < oldOptions.length; i++) {
@@ -938,15 +1014,51 @@
                 var liList = $(box).find("li");
                 for(var j = 0; j < liList.length; j++) {
                     liList.eq(j).click((e)=>{// 点击某一选项
-                        $(e.target).parent().parent().prev().find("input").val($(e.target).html());
-                        $(e.target).parent().parent().prev().find("input").attr("title", $(e.target).parent().parent().prev().find("input").val());
+                        //将选中的选项变为span加入显示框
+                        let oneSpan = $("<div class='neirong' id='" + $(e.target).attr('id')
+                        + "' contenteditable='false' style='white-space:nowrap;height:auto;width:auto;cursor:pointer;'>" 
+                        + $(e.target).html() + "</div>");
+                        //为这个span加入事件
+                        oneSpan.on("mouseenter", (e)=>{
+                            oneSpan.css({
+                                "border": "1px solid #000",
+                                "padding-top":"1px",
+                                "z-index":"99",
+                                "font-size":"8pt"
+                            });
+                            let X = $("<div id='cancel' style='color:#000;display:inline-block;position:relative;right:0%;font-size:10.5pt;z-index:9'>×</div>");
+                            oneSpan.append(X);
+                            oneSpan.on('click', ()=>{
+                                oneSpan.remove();
+                                $(box).prev().attr("title", "");
+                                $(box).prev().attr("idNum", "");
+                                $(this).attr("idNum", "");
+                                $(this.$sele).find("#input").blur();
+                                $(this.$sele).find("#input").focus();
+                            });
+                        });
+                        oneSpan.on("mouseleave", (e)=>{
+                            oneSpan.css({
+                                "border": "0px",
+                                "color":"#000",
+                                "z-index":"default",
+                                "font-size":"10.5pt"
+                            });
+                            oneSpan.unbind("click");
+                            oneSpan.find("#cancel").remove();
+                        });
+                        $(box).prev().find(".neirong").remove();
+                        $(box).prev().prepend(oneSpan);
+                        $(box).prev().find("#input").html("");
+                        $(box).prev().attr("title", $(e.target).html());
+                        $(box).prev().attr("idNum", $(e.target).attr('id'));
+                        $(this).attr("idNum", $(e.target).attr('id'));
+                        //自动隐藏下拉框
                         $(e.target).parent().parent().prev().attr('show-select', 'false');
                         $(e.target).parent().parent().hide();
                         var changeEvent = new Event('change');//定义change事件
                         this.dispatchEvent(changeEvent);// 发出change事件
                         // 注：上面的这个事件主要用于需要外部其他td根据联想下拉所选择的内容自动关联填入用的，外部页面可以监听到组件发出了这个change事件
-                        this.setAttribute("idNum", $(e.target).attr("id"));// 同步修改已选id
-                        $(this).parent().attr("idNum", $(e.target).attr("id"));
                     });
                 }
             }
@@ -973,6 +1085,7 @@
                                 "border": "1px solid #000",
                                 "padding-top":"1px",
                                 "z-index":"99",
+                                "font-size":"8pt"
                             });
                             let X = $("<div id='cancel' style='color:#000;display:inline-block;position:relative;right:0%;font-size:10.5pt;z-index:9'>×</div>");
                             oneSpan.append(X);
@@ -1004,6 +1117,7 @@
                                 "border": "0px",
                                 "color":"#000",
                                 "z-index":"default",
+                                "font-size":"10.5pt"
                             });
                             oneSpan.unbind("click");
                             oneSpan.find("#cancel").remove();
@@ -1032,7 +1146,8 @@
                         $(e.target).parent().parent().prev().find("#input").html("");
 
                         //将鼠标焦点设置回input 从而实现连续输入
-                        $(e.target).parent().parent().prev().find("#input").focus();
+                        $(this.$sele).find("#input").blur();
+                        $(this.$sele).find("#input").focus();
                         // 同样的会发出一个change事件
                         var changeEvent = new Event('change');
                         this.dispatchEvent(changeEvent);
@@ -1208,17 +1323,42 @@
                     }
                 }
                 else if(this.getAttribute("isAsso") === "true" && this.getAttribute("cho") == "radio"){
-                    $(this.shadowRoot.querySelector("#root > div.cs-select > input")).val("");
-                    $(this.shadowRoot.querySelector("#root > div.cs-select > input")).val(strList[0]);
-                    // for(var i = 0; i < strList.length; i++){
-                    //     if(i === 0){
-                    //         $(this.shadowRoot.querySelector("#root > div.cs-select > input")).val(strList[i]);
-                    //     }
-                    //     else{
-                    //         $(this.shadowRoot.querySelector("#root > div.cs-select > input")).val($(this.shadowRoot.querySelector("#root > div.cs-select > input")).val() + "；" + strList[i]);
-                    //     }
-                    // }
-                    this.shadowRoot.querySelector("#root > div.cs-select > input").setAttribute("title", $(this.shadowRoot.querySelector("#root > div.cs-select > input")).val());
+                    let idList = $(this).attr("idNum");
+                    let temp = $("<div id='" + idList + "' class='neirong' contenteditable='false' style='white-space:nowrap;height:auto;width:auto;cursor:pointer;'>"
+                    + strList[0] + "</div>");
+                    //为temp绑定事件
+                    //为这个span加入事件
+                    temp.on("mouseenter", (e)=>{
+                        temp.css({
+                            "border": "1px solid #000",
+                            "padding-top":"1px",
+                            "z-index":"99",
+                            "font-size":"8pt"
+                        });
+                        let X = $("<div id='cancel' style='color:#000;display:inline-block;position:relative;right:0%;font-size:10.5pt;z-index:9'>×</div>");
+                        temp.append(X);
+                        temp.on('click', ()=>{
+                            temp.remove();
+                            $(this.shadowRoot.querySelector("#root > div.cs-select")).attr("title", "");
+                            $(this.shadowRoot.querySelector("#root > div.cs-select")).attr("idNum", "");
+                            $(this).attr("idNum", "");
+                            $(this.shadowRoot.querySelector("#root > div.cs-select")).find("#input").blur();
+                            $(this.shadowRoot.querySelector("#root > div.cs-select")).find("#input").focus();
+                        });
+                    });
+                    temp.on("mouseleave", (e)=>{
+                        temp.css({
+                            "border": "0px",
+                            "color":"#000",
+                            "z-index":"default",
+                            "font-size":"10.5pt"
+                        });
+                        temp.unbind("click");
+                        temp.find("#cancel").remove();
+                    });
+                    $(this.shadowRoot.querySelector("#root > div.cs-select")).find(".neirong").remove();
+                    $(this.shadowRoot.querySelector("#root > div.cs-select")).prepend(temp);
+                    this.shadowRoot.querySelector("#root > div.cs-select").setAttribute("title", temp.html());
                 }
                 else if(this.getAttribute("isAsso") === "true" && this.getAttribute("cho") == "checkbox"){
                     $(this.shadowRoot.querySelector("#root > div.cs-select")).children(".neirong").remove();
@@ -1238,6 +1378,7 @@
                                 "border": "1px solid #000",
                                 "padding-top":"1px",
                                 "z-index":"99",
+                                "font-size":"8pt"
                             });
                             let X = $("<div id='cancel' style='color:#000;display:inline-block;position:relative;right:0%;font-size:10.5pt;z-index:9'>×</div>");
                             temp.append(X);
@@ -1269,6 +1410,7 @@
                                 "border": "0px",
                                 "color":"#000",
                                 "z-index":"default",
+                                "font-size":"10.5pt"
                             });
                             temp.unbind("click");
                             temp.find("#cancel").remove();
@@ -1296,7 +1438,9 @@
                     return str;
                 }
                 else if(this.getAttribute("isAsso") === "true" && this.getAttribute("cho") == "radio"){
-                    return $(this.shadowRoot.querySelector("#root > div.cs-select > input")).val();
+                    let spanList = $(this.shadowRoot.querySelector("#root > div.cs-select")).find(".neirong");
+                    str = spanList.html();
+                    return str;
                 }
                 else if(this.getAttribute("isAsso") === "true" && this.getAttribute("cho") == "checkbox"){
                     let spanList = $(this.shadowRoot.querySelector("#root > div.cs-select")).children(".neirong");
@@ -1307,7 +1451,6 @@
                     return str;
                 }
             }
-
             get urlpath() {
                 return this.getAttribute('url');
             }
@@ -1320,8 +1463,14 @@
             set idNum(value) {
                 this.setAttribute('idNum', value);
             }
+            get counts() {
+                return this.getAttribute('counts');
+            }
+            set counts(value) {
+                this.setAttribute('counts', value);
+            }
             static get observedAttributes() {// 观察属性变化，用于当外部js修改属性值时更新下拉数据
-                return ['url', 'idNum'];
+                return ['url', 'idNum', 'counts'];
             }
             attributeChangedCallback(name, oldVal, newVal) {
                 if(name === 'url') {
@@ -1329,6 +1478,10 @@
                 }
                 if(name === 'idNum') {
                     this.idNum=newVal;
+                }
+                if(name === 'counts') {
+                    this.oldOptions = [];
+                    this.getOptions(this.oldOptions);
                 }
             }
         }
